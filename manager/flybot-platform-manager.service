@@ -1,0 +1,24 @@
+[Unit]
+Description=FlyBot platform isolated runtime manager
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /srv/flybot-platform-botawaken/manager/worker.py --config /srv/flybot-platform-botawaken/manager/config.json
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=50
+CPUQuota=100%
+MemoryMax=256M
+TasksMax=96
+# Manager must see its own mounts in the host namespace so Docker can bind them.
+# Do not use PrivateMounts/ProtectSystem here. It is a trusted privileged worker.
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

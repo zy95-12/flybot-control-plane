@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15231d"><title>FlyBot 控制台 · 用户管理</title>
+  <link rel="stylesheet" href="./console.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./console.html"><span class="mark">F</span><span>flybot<small>CONTROL PLANE</small></span></a><div class="top-right"><a class="api-state" href="./login.html"><i></i>用户登录入口</a><button class="quiet" id="logout" hidden>退出登录</button></div></header>
+  <main class="wrap">
+    <div class="notice"><b>FlyBot 管理控制台</b><span>管理账号、邀请及独立用户实例。</span></div>
+    <section id="loginView" class="login-card">
+      <div class="kicker">ADMINISTRATOR ACCESS</div><h1>登录控制台</h1><p>使用本地初始化时创建的管理员账号。</p>
+      <form id="loginForm"><label>邮箱<input type="email" name="email" autocomplete="username" required></label><label>密码<input type="password" name="password" autocomplete="current-password" required></label><button class="primary" type="submit">登录 <span>→</span></button><div class="form-error" id="loginError" role="alert"></div></form>
+    </section>
+    <section id="appView" hidden>
+      <div class="heading"><div><div class="kicker">USER ADMINISTRATION</div><h1>用户管理</h1><p id="welcome"></p></div><button class="quiet" id="reload">↻ 刷新</button></div>
+      <div class="grid">
+        <section class="card invite-card"><div class="card-title"><div><h2>邀请新用户</h2><p>邀请链接一次有效，72 小时后过期。</p></div><span class="step">01</span></div>
+          <form id="inviteForm"><label>用户邮箱<input type="email" name="email" placeholder="name@example.com" required></label><button class="primary" type="submit">生成邀请链接 <span>↗</span></button></form>
+          <div id="inviteResult" class="invite-result" hidden><label>一次性注册链接</label><div class="token-line"><code id="inviteUrl"></code><button id="copyInvite" type="button">复制</button></div><small>链接只显示这一次。请用安全渠道交给指定用户。</small></div>
+        </section>
+        <section class="card stat-card"><span>账号总数</span><b id="userCount">—</b><small>包含暂停账号</small><div class="stat-accent">USER DIRECTORY</div></section>
+      </div>
+      <section class="card users-card"><div class="card-title"><div><h2>账号目录</h2><p>停用会立即撤销平台会话，并通知管理进程停止实例。</p></div><button class="quiet" id="usersRefresh">重新载入</button></div><div class="table-scroll"><table><thead><tr><th>用户</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="usersBody"></tbody></table></div><div id="usersError" class="form-error"></div></section>
+      <section class="card"><div class="card-title"><div><h2>用户实例</h2><p>每用户独立容器；停止保留数据。</p></div><a class="quiet" href="./account.html">我的 FlyBot ↗</a></div><div class="table-scroll"><table><thead><tr><th>用户</th><th>状态</th><th>版本</th><th>操作</th></tr></thead><tbody id="instancesBody"></tbody></table></div><p class="form-error" id="instancesError"></p></section>
+      <section class="card" aria-labelledby="upgradeHeading"><div class="card-title"><div><h2 id="upgradeHeading">FlyBot 版本升级</h2><p>自动检查最新 commit，先检查 canary，再逐个备份并升级。每个实例会短暂重连。</p></div><button class="primary" id="upgradeFlyBot" type="button">一键升级 FlyBot ↗</button></div><p id="upgradeVersions">正在读取当前版本</p><div role="status" aria-live="polite"><b id="upgradeStatus">尚未发起升级</b><p id="upgradeProgress"></p><a id="upgradeCommit" target="_blank" rel="noopener noreferrer" hidden></a></div><p class="form-error" id="upgradeError"></p><small>失败时停止后续升级；依赖声明发生变化时提示维护人员处理。Bot Social 共享服务单独维护。</small></section>
+      <section class="card" aria-labelledby="socialUpgradeHeading"><div class="card-title"><div><h2 id="socialUpgradeHeading">Bot Social 版本升级</h2><p>自动备份共享数据，执行隔离 canary，再切换生产容器。升级期间 Bot Social 会短暂重连。</p></div><button class="primary" id="upgradeBotSocial" type="button">一键升级 Bot Social ↗</button></div><div role="status" aria-live="polite"><b id="socialUpgradeStatus">尚未发起升级</b><p id="socialUpgradeProgress"></p></div><p class="form-error" id="socialUpgradeError"></p><small>失败会保留旧容器和共享数据备份，可按记录回滚。</small></section>
+      <section class="card audit-card"><div class="card-title"><div><h2>最近操作</h2><p>管理员邀请与账号状态变更。</p></div></div><div id="auditList" class="audit-list"></div></section>
+    </section>
+    <footer>FlyBot Control Plane <span>·</span> 邀请注册 <span>·</span> 不触碰现有服务器服务</footer>
+  </main>
+  <script src="./console.js?v=20261024-resilient-social-upgrade"></script>
+</body>
+</html>

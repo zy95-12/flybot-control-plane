@@ -1,0 +1,32 @@
+{
+  "domain": "botawaken.com",
+  "server_ip": "${SERVER_IP}",
+  "dns_provider_reported_by_user": "Cloudflare (registrar: Wix)",
+  "public_https_port": 443,
+  "panel_hostname": "panel.botawaken.com",
+  "social_hostname": "social.botawaken.com",
+  "runtime_hostname_pattern": "u-<32-hex-instance-id>.botawaken.com",
+  "dns_records_to_add": [
+    {
+      "type": "A",
+      "host": "panel",
+      "value": "${SERVER_IP}",
+      "status": "Cloudflare authoritative DNS verified: DNS only, ${SERVER_IP}, 2026-10-20"
+    },
+    {
+      "type": "A",
+      "host": "social",
+      "value": "${SERVER_IP}",
+      "status": "Cloudflare authoritative DNS verified: DNS only, ${SERVER_IP}, 2026-10-20"
+    },
+    {
+      "type": "A",
+      "host": "*",
+      "value": "${SERVER_IP}",
+      "status": "Cloudflare authoritative DNS verified: DNS only, ${SERVER_IP}, 2026-10-20"
+    }
+  ],
+  "public_tls_strategy": "individual-host ACME certificates using TLS-ALPN-01 on TCP 443; no wildcard certificate or DNS API credential required",
+  "status": "DNS migration and wildcard verified; isolated ARM64 image builds in progress; ingress and provisioning not active",
+  "dns_recommendation": "Cloudflare DNS active; retain DNS only for panel, social and wildcard"
+}

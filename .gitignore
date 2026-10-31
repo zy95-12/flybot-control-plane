@@ -1,0 +1,45 @@
+# secrets
+*.env
+private.env*
+!.env.example
+!**/*.env.example
+secrets/
+secrets.json
+*.pem
+*.key
+*.crt
+*.p12
+*token*
+!**/*token*.py
+# instance data / state
+u-*/
+!**/u-*.md
+disk.img
+*.img
+volumes/
+backups/
+state/
+manager-state/
+renewal-state/
+certificates/
+certificate-renewals/
+upgrades/
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.log
+logs/
+# build artifacts / caches
+__pycache__/
+*.pyc
+node_modules/
+*.tar
+*.tgz
+*.tar.gz
+blob-*
+dist/
+build/
+manager/config.json
+*.bak*
+*.before*

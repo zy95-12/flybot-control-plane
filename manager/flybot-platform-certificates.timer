@@ -1,0 +1,11 @@
+[Unit]
+Description=Check FlyBot private certificates daily
+
+[Timer]
+OnCalendar=*-*-* 04:10:00 Asia/Shanghai
+RandomizedDelaySec=20min
+Persistent=true
+Unit=flybot-platform-certificates.service
+
+[Install]
+WantedBy=timers.target

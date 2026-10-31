@@ -1,0 +1,53 @@
+# Apply after compose.public.yaml. No host ports are published in tunnel mode.
+services:
+  ingress:
+    ports: !reset []
+    volumes: !override
+      - ${INGRESS_STATIC_FILE:?Required}:/etc/traefik/traefik.yml:ro
+      - ${INGRESS_DYNAMIC_DIR:?Required}:/etc/traefik/dynamic:ro
+      - ${RUNTIME_CA_CERT:?Required}:/run/secrets/runtime-ca.pem:ro
+      - ${SOCIAL_INGRESS_CERT:?Required}:/run/secrets/social-cert.pem:ro
+      - ${SOCIAL_INGRESS_KEY:?Required}:/run/secrets/social-key.pem:ro
+    networks:
+      tunnel_link: {ipv4_address: 172.30.24.3}
+  runtime-canary:
+    environment:
+      NODE_EXTRA_CA_CERTS: /run/secrets/runtime-ca.pem
+  tunnel:
+    profiles: [tunnel]
+    image: ${CLOUDFLARED_IMAGE:?Supply pinned connector image ID}
+    user: "65532:65532"
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --edge-ip-version
+      - "4"
+      - --protocol
+      - http2
+      - --loglevel
+      - warn
+      - --metrics
+      - 0.0.0.0:2000
+      - run
+      - --token-file
+      - /run/secrets/tunnel-token
+    volumes:
+      - ${CLOUDFLARE_TOKEN_FILE:?Required}:/run/secrets/tunnel-token:ro
+    networks:
+      tunnel_link: {ipv4_address: 172.30.24.2}
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=32m,uid=65532,gid=65532,mode=0700"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 64
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+networks:
+  tunnel_link:
+    ipam:
+      config: [{subnet: 172.30.24.0/24}]

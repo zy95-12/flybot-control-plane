@@ -1,0 +1,11 @@
+{
+  "project": "flybot-platform-botawaken",
+  "root": "/srv/flybot-platform-botawaken",
+  "runtime_image": "sha256:ecf67a0cb1bce32d154ceaf714c899c94f0f618e41a80fc5b69e87f0816306d0",
+  "version": "FlyBot-06cd045_DSH-0.2.1-rc.2",
+  "domain": "botawaken.com",
+  "ca": "/srv/flybot-platform-botawaken/certificates/ca-20261020",
+  "subnet_pool": "172.31.128.0/20",
+  "max_instances": 16,
+  "storage_gib": 8
+}

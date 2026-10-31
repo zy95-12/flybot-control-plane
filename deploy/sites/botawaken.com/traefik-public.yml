@@ -1,0 +1,25 @@
+# Public-entry configuration only. Not started by the staging overlay.
+# Validate using the ACME staging CA first; its certificates are NOT trusted by
+# browsers. Change caServer to the production directory only after validation.
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      insecure: false
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+api:
+  dashboard: false
+  insecure: false
+log:
+  level: ERROR
+  format: json
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      storage: /var/lib/traefik/acme/acme.json
+      tlsChallenge: {}
+# No accessLog: launch URLs carry reusable bearer tokens.

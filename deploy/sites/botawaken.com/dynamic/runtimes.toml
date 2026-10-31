@@ -1,0 +1,8 @@
+# Initial empty runtime inventory. The route generator atomically replaces this
+# file once the manager has verified ready instances; retain this middleware.
+[http]
+  [http.middlewares.flybot-security.headers]
+    referrerPolicy = "no-referrer"
+    contentTypeNosniff = true
+    [http.middlewares.flybot-security.headers.customResponseHeaders]
+      X-Frame-Options = "DENY"

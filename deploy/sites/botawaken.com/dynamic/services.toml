@@ -1,0 +1,42 @@
+[http.routers.control-plane]
+  rule = "Host(`panel.botawaken.com`)"
+  entryPoints = ["websecure"]
+  service = "control-plane"
+  [http.routers.control-plane.tls]
+    certResolver = "letsencrypt"
+
+[http.services.control-plane.loadBalancer]
+  passHostHeader = true
+  [[http.services.control-plane.loadBalancer.servers]]
+    url = "http://control-plane:8088"
+
+[http.routers.bot-social]
+  rule = "Host(`social.botawaken.com`)"
+  entryPoints = ["websecure"]
+  service = "bot-social"
+  middlewares = ["flybot-security"]
+  [http.routers.bot-social.tls]
+    certResolver = "letsencrypt"
+
+[http.services.bot-social.loadBalancer]
+  passHostHeader = true
+  [[http.services.bot-social.loadBalancer.servers]]
+    url = "http://bot-social:8787"
+
+[tls.options.default]
+  minVersion = "VersionTLS12"
+
+# Limit password hashing and invite registration per client IP before the API.
+[http.routers.control-auth]
+  rule = "Host(`panel.botawaken.com`) && (Path(`/api/auth/login`) || Path(`/api/auth/register`))"
+  priority = 100
+  entryPoints = ["websecure"]
+  service = "control-plane"
+  middlewares = ["auth-rate-limit"]
+  [http.routers.control-auth.tls]
+    certResolver = "letsencrypt"
+
+[http.middlewares.auth-rate-limit.rateLimit]
+  average = 2
+  burst = 4
+  period = "1s"

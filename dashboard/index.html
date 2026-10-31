@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101915">
+  <title>FlyBot 控制台 · 运维总览</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="FlyBot 控制台首页">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span class="brand-copy"><b>flybot</b><small>CONTROL PLANE</small></span>
+      </a>
+      <div class="workspace-label">工作区 <span class="chevrons">⌃⌄</span></div>
+      <div class="workspace"><span class="workspace-avatar">S</span><span><b>SE · 推理服务</b><small>个人部署空间</small></span><span class="dots">•••</span></div>
+      <div class="nav-label">管理</div>
+      <nav class="nav-list" aria-label="主导航">
+        <a class="nav-item active" href="#overview" data-view="overview"><span class="nav-icon">▦</span>总览 <kbd>⌘ 1</kbd></a>
+        <a class="nav-item" href="#instances" data-view="instances"><span class="nav-icon">▣</span>用户实例 <span class="nav-count">12</span></a>
+        <a class="nav-item" href="#users" data-view="users"><span class="nav-icon">♙</span>用户管理</a>
+        <a class="nav-item" href="#releases" data-view="releases"><span class="nav-icon">↗</span>版本与发布 <span class="nav-pulse"></span></a>
+      </nav>
+      <div class="nav-label nav-label-spaced">系统</div>
+      <nav class="nav-list" aria-label="系统导航">
+        <a class="nav-item" href="#social" data-view="social"><span class="nav-icon">◎</span>Bot Social</a>
+        <a class="nav-item" href="#audit" data-view="audit"><span class="nav-icon">≋</span>操作审计</a>
+        <a class="nav-item" href="#settings" data-view="settings"><span class="nav-icon">⚙</span>平台设置</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="host-card"><div class="host-title"><span class="live-dot"></span>主机状态 <span class="mono">READ ONLY</span></div><div class="host-name">目标主机 · ARM64</div><div class="host-meta">ARM64 <i>·</i> Docker 27.5.1</div><div class="host-usage"><span>系统盘</span><b>91%</b><div class="usage-track disk-root"><i></i></div><small>剩余 19 GiB</small></div><div class="host-usage data-usage"><span>Docker 数据盘</span><b>7%</b><div class="usage-track disk-data"><i></i></div><small>剩余 6.5 TiB</small></div></div>
+        <button class="profile"><span class="profile-avatar">DC</span><span><b>Danyang Chen</b><small>平台管理员</small></span><span class="dots">•••</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div class="breadcrumbs"><span>SE · 推理服务</span><b>/</b><strong id="crumb-current">总览</strong></div><div class="top-actions"><div class="read-only"><span class="live-dot"></span>连接状态 <b>只读预览</b></div><button class="icon-button" aria-label="通知">♧<i></i></button><a class="help-link" href="./console.html">管理员控制台 <span>↗</span></a></div></header>
+      <div class="demo-banner"><span class="demo-icon">i</span><div><b>界面原型 · 演示数据</b><span>当前没有连接服务器，页面上的用户与容器信息均为示例，不会触发任何操作。</span></div><button id="bannerDismiss" aria-label="关闭提示">×</button></div>
+
+      <section class="page-heading"><div><div class="eyebrow">MONDAY, OCTOBER 20, 2026 <span>·</span> PLATFORM OVERVIEW</div><h1>运行概览<span class="heading-period">/</span></h1><p>平台运行状态、用户实例与发布进度一览。</p></div><div class="heading-actions"><button class="button secondary" id="refreshBtn"><span>↻</span> 刷新数据</button><button class="button primary" id="newUserBtn"><span>＋</span> 邀请用户</button></div></section>
+
+      <section class="metric-grid" aria-label="平台关键指标">
+        <article class="metric-card"><div class="metric-top"><span>注册用户</span><span class="metric-glyph green">♙</span></div><div class="metric-value">128<span class="metric-trend">↗ 12.4%</span></div><div class="metric-bottom"><span>较上月</span><span class="mini-bars signup-bars"><i ></i><i ></i><i ></i><i ></i><i ></i><i ></i><i ></i></span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>运行中实例</span><span class="metric-glyph blue">▣</span></div><div class="metric-value">104<span class="metric-sub">/ 128</span></div><div class="metric-bottom"><span>24 个已暂停</span><span class="progress-mini instance-progress"><i></i></span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>资源使用</span><span class="metric-glyph amber">◫</span></div><div class="metric-value">38<span class="metric-unit">%</span><span class="metric-split">CPU</span><span class="metric-value-secondary">52<span>%</span></span><span class="metric-split">内存</span></div><div class="metric-bottom"><span>192 核 · 1.5 TiB</span><span class="resource-spark">▁▂▃▂▄▅▃▆▅</span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>待处理告警</span><span class="metric-glyph coral">⚑</span></div><div class="metric-value">03<span class="metric-alert">2 条需关注</span></div><div class="metric-bottom"><span>最近 24 小时</span><a href="#audit" data-view="audit">查看告警 →</a></div></article>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel instances-panel">
+          <div class="panel-header"><div><div class="panel-title-row"><h2>用户实例</h2><span class="status-chip"><i></i>全部正常</span></div><p>按最近活跃时间排序 <span class="muted-dot">·</span> 最近同步 2 分钟前</p></div><a class="text-link" href="#instances" data-view="instances">查看全部 <span>→</span></a></div>
+          <div class="table-tools"><div class="filter-tabs"><button class="filter-tab selected" data-filter="all">全部 <span>12</span></button><button class="filter-tab" data-filter="running">运行中 <span>9</span></button><button class="filter-tab" data-filter="paused">已暂停 <span>3</span></button></div><label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="搜索用户或实例" aria-label="搜索用户或实例"><kbd>⌘ K</kbd></label></div>
+          <div class="table-wrap"><table><thead><tr><th>用户 / 实例</th><th>状态</th><th>版本</th><th>资源</th><th>最近活跃</th><th></th></tr></thead><tbody id="instanceRows">
+            <tr data-status="running"><td><div class="user-cell"><span class="user-avatar avatar-lilac">LX</span><span><b>林晓</b><small>fb-user-8f2a <i>·</i> lx@example.com</small></span></div></td><td><span class="status running"><i></i>运行中</span></td><td><span class="version-tag">v0.2.1</span></td><td><div class="resource-cell"><span>CPU 0.8 <i>·</i> RAM 2.1 GB</span><div class="resource-meter meter-27"><i></i></div></div></td><td class="time-cell">刚刚</td><td><button class="row-menu" aria-label="更多操作">···</button></td></tr>
+            <tr data-status="running"><td><div class="user-cell"><span class="user-avatar avatar-sky">WY</span><span><b>王一</b><small>fb-user-71b3 <i>·</i> wangyi@example.com</small></span></div></td><td><span class="status running"><i></i>运行中</span></td><td><span class="version-tag">v0.2.1</span></td><td><div class="resource-cell"><span>CPU 1.2 <i>·</i> RAM 3.4 GB</span><div class="resource-meter meter-41"><i></i></div></div></td><td class="time-cell">3 分钟前</td><td><button class="row-menu" aria-label="更多操作">···</button></td></tr>
+            <tr data-status="paused"><td><div class="user-cell"><span class="user-avatar avatar-peach">ZM</span><span><b>周敏</b><small>fb-user-c310 <i>·</i> zhoum@example.com</small></span></div></td><td><span class="status paused"><i></i>已暂停</span></td><td><span class="version-tag">v0.2.0</span><span class="update-dot"></span></td><td><div class="resource-cell"><span>CPU — <i>·</i> RAM —</span><div class="resource-meter idle"><i></i></div></div></td><td class="time-cell">昨天 18:42</td><td><button class="row-menu" aria-label="更多操作">···</button></td></tr>
+            <tr data-status="running"><td><div class="user-cell"><span class="user-avatar avatar-mint">CH</span><span><b>陈浩</b><small>fb-user-4d9e <i>·</i> chenhao@example.com</small></span></div></td><td><span class="status running"><i></i>运行中</span></td><td><span class="version-tag">v0.2.1</span></td><td><div class="resource-cell"><span>CPU 0.4 <i>·</i> RAM 1.8 GB</span><div class="resource-meter meter-19"><i></i></div></div></td><td class="time-cell">12 分钟前</td><td><button class="row-menu" aria-label="更多操作">···</button></td></tr>
+          </tbody></table></div>
+          <div class="panel-footer"><span>显示 <b>4</b> 条，共 <b>12</b> 个实例</span><div class="pagination"><button disabled>←</button><button class="page-number">1</button><button>2</button><button>3</button><button>→</button></div></div>
+        </div>
+        <aside class="right-column">
+          <div class="panel rollout-panel"><div class="panel-header compact"><div><div class="panel-title-row"><h2>版本发布</h2><span class="new-tag">NEW</span></div><p>当前稳定版本</p></div><button class="more-button" aria-label="更多">···</button></div><div class="release-current"><div class="release-logo">F</div><div><b>FlyBot <span>v0.2.1</span></b><small>发布于 2026.10.19 <i>·</i> ARM64 就绪</small></div><span class="stable-pill">STABLE</span></div><div class="release-divider"></div><div class="release-progress-head"><span>Canary 发布</span><b>2 / 12 <small>实例</small></b></div><div class="release-progress"><i></i></div><div class="release-meta"><span><i class="green-dot"></i> 2 成功</span><span><i class="gray-dot"></i> 10 等待中</span></div><button class="button rollout-button" id="rolloutBtn">管理发布批次 <span>→</span></button><div class="release-note"><span>↗</span> 版本固定与回滚策略已启用</div></div>
+          <div class="panel social-panel"><div class="panel-header compact"><div><div class="panel-title-row"><h2>Bot Social</h2><span class="service-status"><i></i>健康</span></div><p>共享服务 · 独立数据卷</p></div><span class="social-mark">◎</span></div><div class="social-stats"><div><b>128</b><small>已连接 homes</small></div><div><b>99.98<span>%</span></b><small>30 天可用性</small></div></div><div class="social-footer"><span><i class="green-dot"></i>服务在线</span><span>SHA <code>2d64171</code></span></div></div>
+        </aside>
+      </section>
+
+      <section class="bottom-grid"><div class="panel activity-panel"><div class="panel-header compact"><div><div class="panel-title-row"><h2>最近操作</h2><span class="today-label">今天</span></div><p>平台操作与发布审计</p></div><a class="text-link" href="#audit" data-view="audit">完整审计日志 →</a></div><div class="activity-list"><div class="activity-row"><span class="activity-icon release">↗</span><div><b>Canary 发布已完成</b><small>FlyBot v0.2.1 <i>·</i> 2 个实例升级成功</small></div><time>10:42</time></div><div class="activity-row"><span class="activity-icon invite">＋</span><div><b>邀请已发送</b><small>管理员邀请 <i>·</i> new.user@example.com</small></div><time>09:18</time></div><div class="activity-row"><span class="activity-icon backup">◉</span><div><b>Bot Social 数据备份完成</b><small>快照 bs-20261020-0200 <i>·</i> 4.2 GB</small></div><time>02:00</time></div></div></div><div class="panel guardrail-panel"><div class="guardrail-icon">⛨</div><div><span class="eyebrow">SAFETY GUARDRAILS</span><h3>隔离边界已配置</h3><p>用户实例独立卷与网络；禁止容器特权和 Docker Socket 挂载。</p><a href="#settings" data-view="settings">查看部署约束 <span>→</span></a></div></div></section>
+      <footer class="page-footer"><span>FlyBot Control Plane <b>·</b> 本地原型</span><span>无生产连接 <i></i> 数据仅供界面演示</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="./app.js"></script>
+</body>
+</html>

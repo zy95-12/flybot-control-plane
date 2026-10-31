@@ -1,0 +1,143 @@
+# Standalone public stack; use a private environment file under the new project.
+name: flybot-platform-botawaken
+x-limits: &limits
+  restart: unless-stopped
+  security_opt: [no-new-privileges:true]
+  logging:
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+services:
+  db:
+    <<: *limits
+    image: ${POSTGRES_IMAGE:?Supply verified ARM64 image}
+    environment:
+      POSTGRES_DB: flybot_control
+      POSTGRES_USER: flybot_control
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required}
+    volumes: [control_db:/var/lib/postgresql/data]
+    networks: [control_internal]
+    cpus: 1.0
+    mem_limit: 1g
+    pids_limit: 160
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=64m", "/var/run/postgresql:rw,nosuid,nodev,size=16m"]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U flybot_control -d flybot_control]
+      interval: 10s
+      timeout: 4s
+      retries: 6
+      start_period: 20s
+  control-plane:
+    <<: *limits
+    image: ${CONTROL_PLANE_IMAGE:?Supply built image ID}
+    environment:
+      APP_SECRET: ${APP_SECRET:?Required}
+      DATABASE_URL: postgresql+psycopg://flybot_control:${POSTGRES_PASSWORD}@db:5432/flybot_control
+      AUTO_CREATE_SCHEMA: "false"
+      COOKIE_SECURE: "true"
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [control_internal, ingress_control]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=64m"]
+    cap_drop: [ALL]
+    cpus: 1.0
+    mem_limit: 512m
+    pids_limit: 128
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/api/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+  bot-social:
+    <<: *limits
+    image: ${BOTSOCIAL_IMAGE:?Supply built image ID}
+    environment:
+      PUBLIC_BASE_URL: https://social.botawaken.com
+      HOST: 0.0.0.0
+      PORT: "8787"
+      DATA_DIR: /data
+      LOG: "0"
+      WEBHOOK_ALLOW_PRIVATE: "0"
+    volumes: [social_data:/data]
+    networks: [social_internal]
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=64m"]
+    cap_drop: [ALL]
+    cpus: 1.0
+    mem_limit: 1g
+    pids_limit: 128
+    stop_grace_period: 30s
+  runtime-canary:
+    <<: *limits
+    image: ${FLYBOT_RUNTIME_IMAGE:?Supply built image ID}
+    environment:
+      INSTANCE_ID: "00000000000000000000000000000001"
+      PLATFORM_DOMAIN: botawaken.com
+      BOT_SOCIAL_PUBLIC_URL: https://social.botawaken.com
+      PUBLIC_HTTPS_PORT: "443"
+      BOT_SOCIAL_DISPLAY_NAME: Platform Canary
+    volumes:
+      - canary_data:/data
+      - canary_workspace:/workspace
+      - ${CANARY_TLS_CERT:?Required}:/run/secrets/runtime-cert.pem:ro
+      - ${CANARY_TLS_KEY:?Required}:/run/secrets/runtime-key.pem:ro
+      - ${RUNTIME_CA_CERT:?Required}:/run/secrets/runtime-ca.pem:ro
+    networks:
+      runtime_canary: {ipv4_address: 172.30.20.2}
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m
+      - /run/flybot:rw,nosuid,nodev,size=4m,uid=10001,gid=10001,mode=0700
+    cap_drop: [ALL]
+    cpus: 2.0
+    mem_limit: 2g
+    pids_limit: 256
+    stop_grace_period: 30s
+  ingress:
+    <<: *limits
+    image: ${TRAEFIK_IMAGE:?Supply verified ARM64 image}
+    user: "10001:10001"
+    command: [--configFile=/etc/traefik/traefik.yml]
+    ports: ["0.0.0.0:443:443"]
+    volumes:
+      - ${INGRESS_STATIC_FILE:?Required}:/etc/traefik/traefik.yml:ro
+      - ${INGRESS_DYNAMIC_DIR:?Required}:/etc/traefik/dynamic:ro
+      - ${INGRESS_ACME_DIR:?Required}:/var/lib/traefik/acme
+      - ${RUNTIME_CA_CERT:?Required}:/run/secrets/runtime-ca.pem:ro
+    networks:
+      ingress_control: {}
+      social_internal: {}
+      runtime_canary:
+        ipv4_address: 172.30.20.3
+        aliases: [social.botawaken.com]
+    sysctls: {net.ipv4.ip_unprivileged_port_start: "0"}
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=32m"]
+    cap_drop: [ALL]
+    cpus: 1.0
+    mem_limit: 256m
+    pids_limit: 128
+networks:
+  runtime_canary:
+    ipam:
+      config: [{subnet: 172.30.20.0/24}]
+  control_internal:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.21.0/24}]
+  ingress_control:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.22.0/24}]
+  social_internal:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.23.0/24}]
+volumes:
+  control_db:
+  social_data:
+  canary_data:
+  canary_workspace:

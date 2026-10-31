@@ -1,0 +1,16 @@
+[Unit]
+Description=FlyBot platform private certificate renewal
+After=docker.service flybot-platform-manager.service
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecCondition=/usr/bin/systemctl --quiet is-active docker.service
+ExecStart=/usr/bin/python3 /srv/flybot-platform-botawaken/manager/renew_certificates.py
+CPUQuota=100%
+MemoryMax=256M
+TasksMax=96
+TimeoutStartSec=45min
+Restart=on-failure
+RestartSec=30min

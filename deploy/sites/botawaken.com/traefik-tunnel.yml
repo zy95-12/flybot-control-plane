@@ -1,0 +1,22 @@
+# Public TLS is provided by Cloudflare. This listener has no host-published port.
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      insecure: false
+  webtunnel:
+    address: "172.30.24.3:8080"
+    forwardedHeaders:
+      trustedIPs: ["172.30.24.2/32"]
+      insecure: false
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+api:
+  dashboard: false
+  insecure: false
+log:
+  level: ERROR
+  format: json
+# No ACME resolver and no access logging.
