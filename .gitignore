@@ -32,6 +32,7 @@ upgrades/
 logs/
 # build artifacts / caches
 __pycache__/
+.venv/
 *.pyc
 node_modules/
 *.tar

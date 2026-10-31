@@ -1,4 +1,4 @@
-"""Fetch only npm package files from a fixed, immutable upstream commit."""
+"""Fetch npm package files from an operator-selected repository and immutable commit."""
 from __future__ import annotations
 import base64
 import concurrent.futures
@@ -18,7 +18,19 @@ import tempfile
 import time
 import urllib.request
 
-REPO = 'ThinkFlowLab/FlyBot'
+def source_repository():
+    repository = os.environ.get('FLYBOT_SOURCE_REPOSITORY', 'zy95-12/FlyBot')
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository) or any(
+            part in {'.', '..'} for part in repository.split('/')):
+        raise UpgradeError('source_invalid')
+    return repository
+
+
+def source_ref():
+    ref = os.environ.get('FLYBOT_SOURCE_REF', 'main')
+    if not ref or len(ref) > 200 or not re.fullmatch(r'[A-Za-z0-9_./-]+', ref) or '..' in ref:
+        raise UpgradeError('source_invalid')
+    return ref
 PACKAGES = [('core', 'ds-bot', 'core-package', 'flybot-core.tgz'),
             ('plugins/social', '@flybot/social', 'social-package', 'flybot-social.tgz'),
             ('plugins/tree', '@flybot/tree', 'tree-package', 'flybot-tree.tgz'),
@@ -30,7 +42,7 @@ class UpgradeError(Exception):
 
 
 def _github_headers(url):
-    # URLs are constructed only from the fixed repository, hex commit and
+    # URLs are constructed only from the operator repository, hex commit and
     # validated Git tree paths; no HTTP caller supplies a URL or command.
     headers = {'User-Agent': 'FlyBot-Platform-Upgrader/1'}
     if urllib.parse.urlsplit(url).hostname == 'api.github.com':
@@ -39,7 +51,8 @@ def _github_headers(url):
         # (HTTP 403 -> source_unavailable). Prefer an optional local token.
         token = (os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN') or '').strip()
         if not token:
-            token_path = Path(os.environ.get('FLYBOT_GITHUB_TOKEN_FILE', '/srv/flybot-platform-botawaken/secrets/github-api-token'))
+            token_path = Path(os.environ.get('FLYBOT_GITHUB_TOKEN_FILE',
+                str(Path(os.environ.get('FLYBOT_PLATFORM_ROOT', '/srv/flybot-platform-botawaken'))/'secrets/github-api-token')))
             try:
                 if token_path.is_file():
                     token = token_path.read_text(encoding='utf-8').strip()
@@ -97,7 +110,7 @@ def download(url, limit=16*1024*1024):
 
 def latest_commit():
     import re
-    result = json.loads(download('https://api.github.com/repos/'+REPO+'/commits/main', 2*1024*1024))
+    result = json.loads(download('https://api.github.com/repos/'+source_repository()+'/commits/'+urllib.parse.quote(source_ref(), safe=''), 2*1024*1024))
     commit = result.get('sha', '')
     if not re.fullmatch(r'[a-f0-9]{40}', commit):
         raise UpgradeError('source_invalid')
@@ -122,7 +135,7 @@ def fetch_sources(commit, destination, cache, pulse):
     except UpgradeError:
         pass
     try:
-        tree = json.loads(download('https://api.github.com/repos/'+REPO+'/git/trees/'+commit+'?recursive=1', 8*1024*1024))
+        tree = json.loads(download('https://api.github.com/repos/'+source_repository()+'/git/trees/'+commit+'?recursive=1', 8*1024*1024))
     except UpgradeError:
         # GitHub's API/raw endpoints can fail independently of codeload. The
         # archive endpoint contains the same immutable commit and lets an
@@ -143,7 +156,7 @@ def fetch_sources(commit, destination, cache, pulse):
         if not re.fullmatch(r'[a-f0-9]{40}', digest):
             raise UpgradeError('source_invalid')
         item = cache/digest
-        data = item.read_bytes() if item.is_file() else download('https://raw.githubusercontent.com/'+REPO+'/'+commit+'/'+path)
+        data = item.read_bytes() if item.is_file() else download('https://raw.githubusercontent.com/'+source_repository()+'/'+commit+'/'+path)
         if hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest() != digest:
             raise UpgradeError('source_invalid')
         if not item.exists():
@@ -178,7 +191,7 @@ def fetch_sources(commit, destination, cache, pulse):
 
 
 def fetch_sources_archive(commit, destination, cache, pulse):
-    data = download('https://codeload.github.com/'+REPO+'/tar.gz/'+commit, 64*1024*1024)
+    data = download('https://codeload.github.com/'+source_repository()+'/tar.gz/'+commit, 64*1024*1024)
     cache.mkdir(mode=0o700, parents=True, exist_ok=True)
     with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as archive:
         members = archive.getmembers()
@@ -274,7 +287,7 @@ def build(runner, stage, commit, base):
     for name in ('package.json', 'profile.json', 'supervisor.mjs'):
         shutil.copy2(overlay/name, context/name)
     (context/'package-lock.json').write_text(json.dumps(lock, indent=2)+'\n')
-    (context/'provenance.json').write_text(json.dumps({'flybot_commit': commit, 'base_image': base, 'dependency_manifests_unchanged': True})+'\n')
+    (context/'provenance.json').write_text(json.dumps({'flybot_repository': source_repository(), 'flybot_ref': source_ref(), 'flybot_commit': commit, 'base_image': base, 'dependency_manifests_unchanged': True})+'\n')
     rm_paths = ' '.join('/opt/flybot/node_modules/'+name for _, name, _, _ in PACKAGES)
     # BuildKit resolves bare FROM sha256:… as docker.io/library/sha256:… and can
     # Hub-timeout even with --pull=false when the digest is only local. Retag onto

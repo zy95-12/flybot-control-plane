@@ -19,3 +19,5 @@ TLS cert/key paths, image tags, `FLYBOT_HOST_PUBLIC_IP`, `FLYBOT_DNS_UPSTREAMS`,
 The manager scripts assume the project root `/srv/flybot-platform-botawaken`; adjust paths in the systemd units and config for your host.
 
 Not included: instance data, databases, backups, certificates, secrets, upgrade job records, build artifacts.
+
+For a clean, isolated local panel/API with two-user HTTP checks, see [dev/README.md](dev/README.md).
